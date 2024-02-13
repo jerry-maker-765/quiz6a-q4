@@ -1,0 +1,91 @@
+---
+title: "Q4"
+output: pdf_document
+date: "2024-02-13"
+---
+```{r}
+library(MASS)
+
+# Set seed for reproducibility
+set.seed(111)
+
+# Parameters for the simulation
+mean1 <- 10
+sd1 <- 2
+mean2 <- 9
+sd2 <- 2
+correlation <- 0.5
+
+# Simulate correlated efficiencies for 8 hours
+sim_data <- mvrnorm(n = 8, mu = c(mean1, mean2), 
+                    Sigma = matrix(c(sd1^2, correlation*sd1*sd2, 
+                                     correlation*sd1*sd2, sd2^2), nrow = 2))
+
+# Convert to a data frame
+efficiency_data <- data.frame(hour = 1:8, 
+                              Employee1 = sim_data[,1], 
+                              Employee2 = sim_data[,2])
+
+# Test 1: Test for normality for both employees
+normality_test_emp1 <- shapiro.test(efficiency_data$Employee1)
+normality_test_emp2 <- shapiro.test(efficiency_data$Employee2)
+
+# Test 2: Test for correlation between the two employees
+correlation_test <- cor.test(efficiency_data$Employee1, efficiency_data$Employee2)
+
+# Test 3: Time series analysis (for simplicity, we just create a ts object here)
+time_series_emp1 <- ts(efficiency_data$Employee1)
+time_series_emp2 <- ts(efficiency_data$Employee2)
+
+# Test 4: Regression analysis to predict Employee 2 efficiency based on Employee 1
+regression_model <- lm(Employee2 ~ Employee1, data = efficiency_data)
+
+# Test 5: Compare means between the two employees
+mean_comparison_test <- t.test(efficiency_data$Employee1, efficiency_data$Employee2)
+
+# Output the results of the tests
+list(
+  NormalityTestEmp1 = normality_test_emp1,
+  NormalityTestEmp2 = normality_test_emp2,
+  CorrelationTest = correlation_test,
+  RegressionModel = summary(regression_model),
+  MeanComparisonTest = mean_comparison_test
+)
+```
+```{r}
+library(ggplot2)
+library(MASS)
+
+# Set seed for reproducibility
+set.seed(123)
+
+# Parameters for the simulation
+mean1 <- 10
+sd1 <- 2
+mean2 <- 9
+sd2 <- 2
+correlation <- 0.5
+
+# Simulate the data for 8 hours
+sim_data <- mvrnorm(n = 8, mu = c(mean1, mean2), 
+                    Sigma = matrix(c(sd1^2, correlation*sd1*sd2, 
+                                     correlation*sd1*sd2, sd2^2), nrow = 2))
+
+# Convert to a data frame
+efficiency_data <- data.frame(hour = 1:8, 
+                              Employee1 = sim_data[,1], 
+                              Employee2 = sim_data[,2])
+
+# Create the line plot using ggplot2
+ggplot(efficiency_data, aes(x = hour)) +
+  geom_line(aes(y = Employee1, colour = "Employee 1")) +
+  geom_point(aes(y = Employee1, colour = "Employee 1")) +
+  geom_line(aes(y = Employee2, colour = "Employee 2")) +
+  geom_point(aes(y = Employee2, colour = "Employee 2")) +
+  labs(x = "Time (hours)", y = "Number of customers served", 
+       colour = "Legend") +
+  ggtitle("Number of Customers Served by Two Employees Over Time") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
